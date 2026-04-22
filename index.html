@@ -1,358 +1,221 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Weather Dashboard</title>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <style>
-body {
+body{
     margin:0;
-    font-family:Segoe UI;
-    background-size:cover;
-    background-position:center;
+    font-family:Arial;
     color:white;
-    display:flex;
-    transition: background-image 0.8s ease-in-out;
+    background:#000;
+    overflow:hidden;
 }
 
-.overlay{
+/* BACKGROUND */
+#bg{
     position:fixed;
     width:100%;
     height:100%;
-    background:rgba(0,0,0,0.6);
+    background-size:cover;
+    background-position:center;
+    filter:brightness(0.5);
     z-index:-1;
-    pointer-events:none;
+    transition:1s;
 }
 
-#city{ font-size:42px; font-weight:bold; }
-#icon{ font-size:60px; }
-
-.rain{position:fixed;width:100%;height:100%;pointer-events:none;}
-.drop{position:absolute;width:2px;height:15px;background:white;animation:fall linear infinite;}
-@keyframes fall{to{transform:translateY(100vh);}}
-
-.cloud{position:fixed;font-size:40px;animation:move linear infinite;}
-@keyframes move{from{transform:translateX(-300px);}to{transform:translateX(110vw);}}
-
-.snowflake{position:fixed;font-size:12px;animation:snowFall linear infinite;}
-@keyframes snowFall{to{transform:translateY(100vh);}}
-
-.flash{position:fixed;width:100%;height:100%;background:white;opacity:0;pointer-events:none;}
-
-.glass{background:rgba(0,0,0,0.6);backdrop-filter:blur(10px);border-radius:20px;}
-
-.sidebar{
-    width:70px;height:100vh;
-    display:flex;flex-direction:column;
-    align-items:center;padding-top:20px;
+/* SEARCH */
+.searchBox{
+    text-align:center;
+    margin-top:20px;
 }
-.sidebar button{
-    background:none;border:none;
-    color:white;font-size:26px;
-    margin:20px 0;cursor:pointer;
+.searchBox input{
+    padding:12px;
+    width:280px;
+    border-radius:25px;
+    border:none;
+}
+.searchBox button{
+    padding:12px 20px;
+    border:none;
+    border-radius:25px;
+    background:#2bbcff;
+    color:white;
 }
 
-.container{display:flex;flex:1;}
-.center{flex:2;text-align:center;padding:40px;}
-.right{width:350px;padding:25px;}
-
-.temp{font-size:70px;}
-.fahrenheit{font-size:18px;}
-
-.card{padding:18px;margin-bottom:18px;font-size:18px;}
-
-.search input{
-    padding:12px;border-radius:20px;border:none;width:250px;
+/* MAIN */
+.main{
+    text-align:center;
+    margin-top:80px;
 }
-.search button{
-    padding:12px 16px;border-radius:20px;border:none;
-    background:#38bdf8;color:white;cursor:pointer;
-}
+#cityName{font-size:50px;}
+#temp{font-size:70px;}
 
-.chart-box{
-    background:rgba(0,0,0,0.7);
+/* PANEL */
+.panel{
+    position:fixed;
+    right:20px;
+    top:120px;
+    background:rgba(0,0,0,0.6);
     padding:20px;
+    border-radius:20px;
+    width:260px;
+}
+.panel div{margin:10px 0;}
+
+/* TREND */
+#trend{
+    position:absolute;
+    bottom:20px;
+    left:50%;
+    transform:translateX(-50%);
+    width:80%;
+    height:200px;
+    background:rgba(0,0,0,0.5);
     border-radius:20px;
 }
 
-/* 🔥 Chatbot */
-#chatbotBox{
-position:fixed;
-bottom:20px;
-right:20px;
-width:300px;
-background:rgba(0,0,0,0.85);
-border-radius:15px;
-padding:12px;
-color:white;
-z-index:999;
+/* CHATBOT */
+.chatbot{
+    position:fixed;
+    bottom:20px;
+    right:20px;
+    background:black;
+    padding:15px;
+    border-radius:15px;
 }
-
-#chatOptions button{
-width:100%;
-margin:5px 0;
-padding:8px;
-border:none;
-border-radius:10px;
-background:#38bdf8;
-color:white;
-cursor:pointer;
-}
-
-/* 🔥 hide when dashboard */
-#chatbotBox.hide{
-display:none;
+.chatbot button{
+    display:block;
+    margin:5px 0;
+    width:200px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="overlay"></div>
+<div id="bg"></div>
 
-<div id="rainContainer" class="rain"></div>
-<div id="cloudContainer"></div>
-<div id="snowContainer"></div>
-<div id="flash" class="flash"></div>
-
-<div class="sidebar glass">
-<button onclick="loadWeather('Chennai')">🏠</button>
-<button onclick="showDashboard()">📊</button>
+<div class="searchBox">
+    <input id="cityInput" value="chennai">
+    <button onclick="search()">Search</button>
 </div>
 
-<div class="container">
-
-<div class="center" id="mainView">
-
-<div class="search">
-<input id="cityInput" placeholder="Search city">
-<button onclick="searchCity()">Search</button>
+<div class="main">
+    <h1 id="cityName">--</h1>
+    <div id="temp">--°C</div>
+    <div id="condition"></div>
 </div>
 
-<h2 id="city"></h2>
-<div id="icon">☀️</div>
-
-<div class="temp">
-<span id="celsius"></span>
-<span class="fahrenheit" id="fahrenheit"></span>
+<div class="panel">
+    <div id="humidity">Humidity:</div>
+    <div id="wind">Wind:</div>
+    <div id="feels">Feels:</div>
+    <div id="pressure">Pressure:</div>
 </div>
 
-<p id="desc"></p>
+<div id="trend"></div>
 
-</div>
-
-<div class="right glass" id="rightPanel">
-<div class="card" id="humidity"></div>
-<div class="card" id="wind"></div>
-<div class="card" id="feels"></div>
-<div class="card" id="pressure"></div>
-</div>
-
-<div id="dashboardView" style="display:none;flex:1;padding:40px;">
-<button onclick="showMain()">⬅ Back</button>
-<div class="chart-box">
-<canvas id="tempChart"></canvas>
-</div>
-</div>
-
-</div>
-
-<!-- 🤖 CHATBOT -->
-<div id="chatbotBox">
-<div style="font-weight:bold;margin-bottom:10px;">🤖 Weather Assistant</div>
-<div id="chatOptions"></div>
-<div id="chatResponse" style="margin-top:10px;"></div>
+<div class="chatbot">
+    <b>Weather Assistant</b>
+    <button onclick="showTemp()">🌡 Temperature</button>
+    <button onclick="showWeather()">☁ Weather</button>
+    <button onclick="showHumidity()">💧 Humidity</button>
 </div>
 
 <script>
 
-let chart, clockInterval, lightningInterval, currentOffset=0;
-let baseDescription = "";
-let lastWeather = {};
+let weatherData = {};
 
-/* ==== YOUR MASTER CODE (UNCHANGED) ==== */
-
-/* TIME */
-function getCityTime(offset){
-    let utc = Date.now() + (new Date().getTimezoneOffset() * 60000);
-    let city = new Date(utc + offset * 1000);
-    let h = city.getHours();
-    let m = String(city.getMinutes()).padStart(2,'0');
-    let s = String(city.getSeconds()).padStart(2,'0');
-    let ampm = h>=12?"PM":"AM";
-    h = h%12 || 12;
-    return `${h}:${m}:${s} ${ampm}`;
+/* SEARCH */
+function search(){
+    let city = document.getElementById("cityInput").value;
+    loadWeather(city);
 }
 
-function startClock(){
-    clearInterval(clockInterval);
-    clockInterval = setInterval(()=>{
-        document.getElementById("desc").innerText =
-            baseDescription + "\n\n🕒 Local Time: " + getCityTime(currentOffset);
-    },1000);
-}
-
-/* EFFECTS */
-function clearEffects(){
-rainContainer.innerHTML="";
-cloudContainer.innerHTML="";
-snowContainer.innerHTML="";
-clearInterval(lightningInterval);
-}
-
-function startRain(){for(let i=0;i<100;i++){let d=document.createElement("div");d.className="drop";d.style.left=Math.random()*100+"vw";d.style.animationDuration=(Math.random()+0.5)+"s";rainContainer.appendChild(d);}}
-function startClouds(){for(let i=0;i<10;i++){let c=document.createElement("div");c.className="cloud";c.innerHTML="☁️";c.style.top=Math.random()*60+"vh";c.style.animationDuration=(15+Math.random()*10)+"s";cloudContainer.appendChild(c);}}
-function startSnow(){for(let i=0;i<50;i++){let s=document.createElement("div");s.className="snowflake";s.innerHTML="❄";s.style.left=Math.random()*100+"vw";snowContainer.appendChild(s);}}
-function startLightning(){lightningInterval=setInterval(()=>{flash.style.opacity=0.8;setTimeout(()=>flash.style.opacity=0,100);},4000);}
-
-/* WEATHER */
-function applyWeather(condition,temp){
-clearEffects();
-let c=condition.toLowerCase();
-if(c.includes("rain")||c.includes("drizzle")||c.includes("thunder")){startRain();startLightning();return "🌧";}
-if(c.includes("cloud")){startClouds();return "☁️";}
-if(c.includes("snow")||temp<5){startSnow();return "❄️";}
-return "☀️";
-}
-
-/* BACKGROUND */
-function setBackground(city,condition,temp){
-let key=city.toLowerCase().replace(/\s+/g,'');
-let path=`images/${key}.jpg`;
-
-let img=new Image();
-img.onload=()=> document.body.style.backgroundImage=`url(${path})`;
-
-img.onerror=()=>{
-let cond=condition.toLowerCase();
-if(cond.includes("rain"))
-document.body.style.backgroundImage="url('https://images.unsplash.com/photo-1501594907352-04cda38ebc29')";
-else if(cond.includes("cloud"))
-document.body.style.backgroundImage="url('https://images.unsplash.com/photo-1499346030926-9a72daac6c63')";
-else
-document.body.style.backgroundImage="url('https://images.unsplash.com/photo-1501973801540-537f08ccae7b')";
-};
-
-img.src=path;
-}
-
-/* WEATHER LOAD */
+/* LOAD WEATHER */
 function loadWeather(city){
 
-fetch("http://127.0.0.1:8000/weather/"+city)
+fetch("https://weather-backend-lbad.onrender.com/weather/" + city)
 .then(r=>r.json())
 .then(data=>{
 
-lastWeather = data; // 🔥 only addition
+    if(data.error){
+        alert("City not found");
+        return;
+    }
 
-currentOffset=data.timezone;
+    weatherData = data;
 
-let c=data.temperature;
-let f=(c*9/5)+32;
+    /* UPDATE UI */
+    document.getElementById("cityName").innerText = data.city;
+    document.getElementById("temp").innerText = data.temperature.toFixed(1) + "°C";
+    document.getElementById("condition").innerText = data.description;
 
-document.getElementById("city").innerText=data.city;
-document.getElementById("icon").innerText=applyWeather(data.condition,c);
+    document.getElementById("humidity").innerText = "Humidity: " + data.humidity + "%";
+    document.getElementById("wind").innerText = "Wind: " + data.wind_speed + " m/s";
+    document.getElementById("feels").innerText = "Feels: " + data.feels_like + "°C";
+    document.getElementById("pressure").innerText = "Pressure: " + data.pressure + " hPa";
 
-setBackground(data.city,data.condition,c);
+    /* BACKGROUND */
+    setBackground(data.city);
 
-document.getElementById("celsius").innerHTML=
-c+"°C <span style='font-size:18px'>(Feels "+data.feels_like+"°C)</span>";
-
-document.getElementById("fahrenheit").innerText=" "+f.toFixed(1)+"°F";
-
-baseDescription=data.description;
-
-document.getElementById("humidity").innerText="💧 Humidity: "+data.humidity+"%";
-document.getElementById("wind").innerText="🌬 Wind Speed: "+data.wind_speed+" m/s";
-document.getElementById("feels").innerText="🌡 Feels Like: "+data.feels_like+"°C";
-document.getElementById("pressure").innerText="📊 Pressure: "+data.pressure+" hPa";
-
-startClock();
-loadChart(data.city);
-showOptions(); // 🔥 only addition
+    /* TREND */
+    drawTrend(data.temperature);
 
 });
+}
+
+/* BACKGROUND */
+function setBackground(city){
+    document.getElementById("bg").style.backgroundImage =
+    `url('https://source.unsplash.com/1600x900/?${city}')`;
+}
+
+/* TREND GRAPH */
+function drawTrend(temp){
+
+    let canvas = document.createElement("canvas");
+    canvas.width = 900;
+    canvas.height = 200;
+
+    let ctx = canvas.getContext("2d");
+
+    ctx.strokeStyle = "cyan";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+
+    let points = [
+        temp-2, temp-1, temp-3,
+        temp+1, temp+2, temp+1,
+        temp-1, temp-2
+    ];
+
+    for(let i=0;i<points.length;i++){
+        let x = i*120;
+        let y = 200 - points[i]*4;
+
+        if(i===0) ctx.moveTo(x,y);
+        else ctx.lineTo(x,y);
+    }
+
+    ctx.stroke();
+
+    let div = document.getElementById("trend");
+    div.innerHTML = "";
+    div.appendChild(canvas);
 }
 
 /* CHATBOT */
-function showOptions(){
-document.getElementById("chatOptions").innerHTML=`
-<button onclick="chatAnswer('temp')">🌡 Temperature</button>
-<button onclick="chatAnswer('rain')">🌧 Will it rain?</button>
-<button onclick="chatAnswer('weather')">🌤 Weather today</button>
-<button onclick="chatAnswer('humidity')">💧 Humidity</button>
-<button onclick="chatAnswer('wind')">🌬 Wind speed</button>
-<button onclick="chatAnswer('advice')">🧠 Should I go out?</button>
-`;
-}
+function showTemp(){ alert(weatherData.temperature + "°C"); }
+function showWeather(){ alert(weatherData.condition); }
+function showHumidity(){ alert(weatherData.humidity + "%"); }
 
-function chatAnswer(type){
-let res=document.getElementById("chatResponse");
-
-if(!lastWeather.city){
-res.innerText="⚠️ Search a city first";
-return;
-}
-
-switch(type){
-case "temp": res.innerText=`🌡 ${lastWeather.temperature}°C`; break;
-case "rain": res.innerText=lastWeather.condition.toLowerCase().includes("rain")?"🌧 Yes":"☀️ No"; break;
-case "weather": res.innerText=`🌤 ${lastWeather.description}`; break;
-case "humidity": res.innerText=`💧 ${lastWeather.humidity}%`; break;
-case "wind": res.innerText=`🌬 ${lastWeather.wind_speed} m/s`; break;
-case "advice": res.innerText=lastWeather.condition.toLowerCase().includes("rain")?"🌧 Stay inside":"☀️ Good to go"; break;
-}
-}
-
-/* CHART (unchanged) */
-function loadChart(city){
-fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=6d54e53b2897876e6bd9be07679796ef&units=metric`)
-.then(r=>r.json())
-.then(d=>{
-let temps=[],labels=[];
-let offset=d.city.timezone;
-
-for(let i=0;i<8;i++){
-let utc=d.list[i].dt*1000;
-let cityTime=new Date(utc+offset*1000);
-let h=cityTime.getUTCHours();
-let ampm=h>=12?"PM":"AM";
-h=h%12||12;
-labels.push(h+" "+ampm);
-temps.push(d.list[i].main.temp);
-}
-
-if(chart) chart.destroy();
-
-chart=new Chart(document.getElementById("tempChart"),{
-type:"line",
-data:{labels:labels,datasets:[{label:"Next 24 Hours Temperature (°C)",data:temps,borderColor:"#38bdf8"}]},
-options:{plugins:{legend:{labels:{color:"white"}}}}
-});
-});
-}
-
-/* NAV (only chatbot visibility added) */
-function searchCity(){let c=document.getElementById("cityInput").value;if(c) loadWeather(c);}
-
-function showDashboard(){
-document.getElementById("mainView").style.display="none";
-document.getElementById("rightPanel").style.display="none";
-document.getElementById("dashboardView").style.display="block";
-document.getElementById("chatbotBox").classList.add("hide");
-}
-
-function showMain(){
-document.getElementById("mainView").style.display="block";
-document.getElementById("rightPanel").style.display="block";
-document.getElementById("dashboardView").style.display="none";
-document.getElementById("chatbotBox").classList.remove("hide");
-}
-
-loadWeather("Chennai");
+/* DEFAULT LOAD */
+loadWeather("chennai");
 
 </script>
+
 </body>
 </html>
