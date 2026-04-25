@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#38bdf8">
+
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-QJEFJKSJL5"></script>
 <script>
@@ -372,6 +375,10 @@ if(t=="humidity")chatResponse.innerText=lastWeather.humidity+"%";
 }
 
 loadWeather("Chennai");
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js');
+}
 
 </script>
 </body>
