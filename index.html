@@ -228,9 +228,17 @@ return "☀️";
 
 function setBackground(city, condition){
 
-let key = city.split(",")[0].toLowerCase().replace(/\s+/g,'');
+// 🔥 FORCE CLEAN CITY NAME (bulletproof)
+let key = city.toLowerCase()
+    .split(",")[0]
+    .trim()
+    .replace(/\s+/g,'');
 
 let path = `images/${key}.jpg`;
+
+console.log("CITY:", city);
+console.log("KEY:", key);
+console.log("PATH:", path);
 
 let img = new Image();
 document.body.classList.add("fade-out");
@@ -241,6 +249,8 @@ img.onload = () => {
 };
 
 img.onerror = () => {
+    console.log("IMAGE FAILED:", path);
+
     let cond = condition.toLowerCase();
 
     let fallback =
