@@ -114,7 +114,30 @@ body {
 
 .chart-box{background:rgba(0,0,0,0.7);padding:20px;border-radius:20px;}
 
-#chatbotBox{position:fixed;bottom:20px;right:20px;width:300px;background:rgba(0,0,0,0.85);border-radius:15px;padding:12px;}
+#chatbotBox {
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+    width: 300px;
+    max-height: 65vh;
+
+    overflow-y: auto;
+
+    background: rgba(0,0,0,0.85);
+    border-radius: 15px;
+    padding: 12px;
+    z-index: 1000;
+}
+
+/* 🔥 MOBILE FIX */
+@media (max-width: 768px) {
+    #chatbotBox {
+        width: 90%;
+        right: 5%;
+        bottom: 10px;
+        max-height: 55vh;
+    }
+}
 #chatOptions button{width:100%;margin:5px 0;padding:8px;border:none;border-radius:10px;background:#38bdf8;color:white;}
 #chatbotBox.hide{display:none;}
 .chart-box {
