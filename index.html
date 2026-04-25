@@ -108,6 +108,16 @@ body {
 #chatbotBox{position:fixed;bottom:20px;right:20px;width:300px;background:rgba(0,0,0,0.85);border-radius:15px;padding:12px;}
 #chatOptions button{width:100%;margin:5px 0;padding:8px;border:none;border-radius:10px;background:#38bdf8;color:white;}
 #chatbotBox.hide{display:none;}
+.chart-box {
+   
+    height: 300px;
+}
+
+@media (max-width: 768px) {
+    .chart-container {
+        height: 260px;
+    }
+}
 </style>
 </head>
 
@@ -159,8 +169,8 @@ body {
 
 <div id="dashboardView" style="display:none;flex:1;padding:40px;">
 <button onclick="showMain()">⬅ Back</button>
-<div class="chart-box">
-<canvas id="tempChart"></canvas>
+<div class="chart-container">
+    <canvas id="tempChart"></canvas>
 </div>
 </div>
 
@@ -346,19 +356,41 @@ temps.push(d.list[i].main.temp);
 
 if(chart) chart.destroy();
 
-chart=new Chart(tempChart,{
-type:"line",
-data:{labels,datasets:[{
-label:"Next 24 Hours Temperature (°C)",
-data:temps,
-borderColor:"#38bdf8",
-backgroundColor:"rgba(56,189,248,0.2)",
-tension:0.4
-}]}
+chart = new Chart(tempChart, {
+    type: "line",
+    data: {
+        labels: labels,
+        datasets: [{
+            label: "Next 24 Hours Temperature (°C)",
+            data: temps,
+            borderColor: "#38bdf8",
+            backgroundColor: "rgba(56,189,248,0.2)",
+            tension: 0.4,
+            pointRadius: 3,
+            borderWidth: 2,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: false
+            }
+        },
+        plugins: {
+            legend: {
+                labels: {
+                    color: "white"
+                }
+            }
+        }
+    }
 });
-});
-}
 
+}); // ✅ THIS WAS MISSING (VERY IMPORTANT)
+}
 function searchCity(){
 let c=document.getElementById("cityInput").value.trim();
 if(c) loadWeather(c);
