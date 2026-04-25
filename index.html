@@ -115,18 +115,13 @@ body {
 .chart-box{background:rgba(0,0,0,0.7);padding:20px;border-radius:20px;}
 
 #chatbotBox {
-    position: fixed;
-    bottom: 15px;
-    right: 15px;
-    width: 300px;
-    max-height: 65vh;
-
-    overflow-y: auto;
+    width: 100%;
+    max-width: 500px;
+    margin: auto;
 
     background: rgba(0,0,0,0.85);
-    border-radius: 15px;
-    padding: 12px;
-    z-index: 1000;
+    border-radius: 20px;
+    padding: 20px;
 }
 
 /* 🔥 MOBILE FIX */
@@ -150,6 +145,24 @@ body {
         height: 260px;
     }
 }
+#chatToggle {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 26px;
+    margin: 20px 0;
+    cursor: pointer;
+}
+
+
+
+/* mobile adjust */
+@media (max-width: 768px) {
+    #chatToggle {
+        bottom: 15px;
+        right: 15px;
+    }
+}
 </style>
 </head>
 
@@ -166,6 +179,7 @@ body {
 <div class="sidebar glass">
 <button onclick="loadWeather('Chennai')">🏠</button>
 <button onclick="showDashboard()">📊</button>
+<button onclick="showChat()">🤖</button>
 </div>
 
 <div class="container">
@@ -207,11 +221,60 @@ body {
 </div>
 
 </div>
+<div id="chatView" style="
+    display:none;
+    width:100%;
+    padding:20px;
+">
+    <button onclick="showMain()" style="
+        margin-bottom:20px;
+        padding:10px 15px;
+        border:none;
+        border-radius:10px;
+        background:#38bdf8;
+        color:white;
+        cursor:pointer;
+    ">⬅ Back</button>
 
-<div id="chatbotBox">
-<div style="font-weight:bold;margin-bottom:10px;">🤖 Weather Assistant</div>
-<div id="chatOptions"></div>
-<div id="chatResponse"></div>
+    <div style="
+        display:flex;
+        justify-content:center;
+        align-items:flex-start;
+        width:100%;
+    ">
+
+        <div id="chatbotBox" style="
+    width:100%;
+    max-width:500px;
+    margin: 0 auto;
+
+    background:rgba(0,0,0,0.85);
+    border-radius:20px;
+    padding:20px;
+">
+            <div style="
+                font-weight:bold;
+                margin-bottom:15px;
+                font-size:20px;
+                text-align:center;
+            ">
+                🤖 Weather Assistant
+            </div>
+
+            <div id="chatOptions"></div>
+
+            <div id="chatResponse" style="
+                margin-top:15px;
+                padding:10px;
+                background:rgba(255,255,255,0.1);
+                border-radius:10px;
+                min-height:40px;
+            "></div>
+
+        </div>
+
+    </div>
+
 </div>
 
 <script>
@@ -432,18 +495,25 @@ function showDashboard(){
 document.getElementById("mainView").style.display="none";
 document.getElementById("rightPanel").style.display="none";
 document.getElementById("dashboardView").style.display="block";
-document.getElementById("chatbotBox").classList.add("hide");
+document.getElementById("chatView").style.display = "none";
 }
 
 function showMain(){
 document.getElementById("mainView").style.display="block";
 document.getElementById("rightPanel").style.display="block";
 document.getElementById("dashboardView").style.display="none";
-document.getElementById("chatbotBox").classList.remove("hide");
+document.getElementById("chatView").style.display = "none";
+}
+function showChat(){
+document.getElementById("mainView").style.display = "none";
+document.getElementById("rightPanel").style.display = "none";
+document.getElementById("dashboardView").style.display = "none";
+document.getElementById("chatView").style.display = "block";
+showOptions();
 }
 
 function showOptions(){
-chatOptions.innerHTML=`
+document.getElementById("chatOptions").innerHTML = `
 <button onclick="chatAnswer('temp')">🌡 Temperature</button>
 <button onclick="chatAnswer('rain')">🌧 Rain?</button>
 <button onclick="chatAnswer('weather')">🌤 Weather</button>
@@ -452,11 +522,17 @@ chatOptions.innerHTML=`
 }
 
 function chatAnswer(t){
-if(!lastWeather.city){chatResponse.innerText="Search first";return;}
-if(t=="temp")chatResponse.innerText=lastWeather.temperature+"°C";
-if(t=="rain")chatResponse.innerText=lastWeather.condition.includes("rain")?"Yes":"No";
-if(t=="weather")chatResponse.innerText=lastWeather.description;
-if(t=="humidity")chatResponse.innerText=lastWeather.humidity+"%";
+let response = document.getElementById("chatResponse");
+
+if(!lastWeather.city){
+    response.innerText = "Search first";
+    return;
+}
+
+if(t=="temp") response.innerText = lastWeather.temperature+"°C";
+if(t=="rain") response.innerText = lastWeather.condition.includes("rain")?"Yes":"No";
+if(t=="weather") response.innerText = lastWeather.description;
+if(t=="humidity") response.innerText = lastWeather.humidity+"%";
 }
 
 loadWeather("Chennai");
